@@ -1,10 +1,22 @@
 version: 1.0
 shards:
-  aasm:
-    github: veelenga/aasm.cr
-    version: 0.1.0
+  db:
+    github: crystal-lang/crystal-db
+    version: 0.3.3
+
+  pg:
+    github: will/crystal-pg
+    version: 0.13.1
+
+  query-builder:
+    github: izniburak/query-builder
+    commit: e98d3bf4bccd3d0b13cbc30cc86cc9abb282ca8e
 
   redis:
     github: stefanwille/crystal-redis
     version: 1.7.1
+
+  state_machine:
+    github: CaptainPhilipp/crystal-state_machine
+    commit: 7f62aa50e8d65ea52a25d337294bc6e18c185b5a
 
