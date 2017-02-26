@@ -1,8 +1,11 @@
 require "./JobExecutor/*"
-require "redis"
 
 module JobExecutor
   redis  = Redis.new
-  seeker = RedisQueueSeeker.new(redis, "default_scan") # runs fiber
-  sleep
+  seeker = RedisQueueSeeker.new(redis) # runs fiber
+
+  loop do
+    puts "exit? y/n"
+    break if gets == "y"
+  end
 end

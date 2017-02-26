@@ -6,4 +6,5 @@ module Config
   AWAKE_TIME_LIMIT     = 60_i16
   FUTURE_LOOK_INTERVAL = 60
   SCHEDULE_QUEUE       = "schedule"
+  STANDART_QUEUES      = ["default_scan"]
 end

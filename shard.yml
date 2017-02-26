@@ -16,7 +16,8 @@ dependencies:
     github: will/crystal-pg
     version: 0.13.1
   state_machine:
-    github: luislavena/crystal-state_machine
+    github: CaptainPhilipp/crystal-state_machine
+    branch: fix_union_types
 
 crystal: 0.20.5
 

@@ -1,6 +1,3 @@
-require "state_machine"
-require "json"
-
 # TODO finish shedule scaning
 module JobExecutor
 
@@ -9,11 +6,10 @@ module JobExecutor
     include Helper
     getter :redis, :queue
 
-    @finded_job  : String?
     @finded_jobs : Array(String)?
 
     def initialize(@redis : Redis) : Void
-      @queue = queue_name_to_full_key(Config::SCHEDULE_QUEUE)
+      @queue_key = get_full_queue_key(Config::SCHEDULE_QUEUE)
 
       schedule_machine.trigger(:run)
     end
@@ -42,8 +38,8 @@ module JobExecutor
     end
 
     def look_for_a_job(*, from = 0, upto : I_32) : Bool
-      @finded_jobs = redis.zzrange @queue, from, to
-      @finded_job.any?
+      @finded_jobs = redis.zzrange @queue_key, from, to
+      @finded_jobs.any?
     end
 
   end
