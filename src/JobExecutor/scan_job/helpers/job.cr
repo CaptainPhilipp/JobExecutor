@@ -2,9 +2,12 @@ module JobExecutor
   module Scan
 
     class Job
-      @source_uri : String?
+      @source_uri : String
 
-      def initialize(@source_uri = nil) end
+      def initialize(@source_uri) end
+
+      def run : Void
+      end
 
       def to_json(json : JSON::Builder)
         json.object do

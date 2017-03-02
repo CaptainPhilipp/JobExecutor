@@ -5,6 +5,12 @@ module JobExecutor
 
     class CategoriesList < Scan::Job
 
+      def run : Void
+        Analizis::Page.new @source_uri
+        #
+        #
+        # 
+      end
     end
 
 

@@ -1,8 +1,16 @@
 version: 1.0
 shards:
+  crystagiri:
+    github: madeindjs/crystagiri
+    version: 0.3.2
+
   db:
     github: crystal-lang/crystal-db
     version: 0.3.3
+
+  gumbo-crystal:
+    github: blocknotes/gumbo-crystal
+    version: 0.1.4
 
   pg:
     github: will/crystal-pg
@@ -13,6 +21,6 @@ shards:
     version: 1.7.1
 
   state_machine:
-    github: luislavena/crystal-state_machine
+    github: CaptainPhilipp/crystal-state_machine
     commit: 7f62aa50e8d65ea52a25d337294bc6e18c185b5a
 

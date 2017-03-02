@@ -5,6 +5,9 @@ module JobExecutor
 
     class ProductsList < Scan::Job
 
+      def run : Void
+        Analizis::Page.new @source_uri
+      end
     end
 
 

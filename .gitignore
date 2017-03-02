@@ -1,5 +1,6 @@
 /doc/
 /lib/
 /bin/
+/.tmp/
 /.shards/
 *db-config.cr

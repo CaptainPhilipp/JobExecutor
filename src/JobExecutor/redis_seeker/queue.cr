@@ -20,7 +20,7 @@ module JobExecutor
 
       def config_queue_machine(queue : String) : StateMachine
         machine = StateMachine.new(:stop)
-        machine.when :run,              { stop: :lazy_watch }
+        machine.when :run,              { stop: :awake_watch }
         machine.when :job_finded,       { lazy_watch: :do_job, awake_watch: :do_job }
         machine.when :job_done,         { do_job: :awake_watch }
         machine.when :too_long_waiting, { awake_watch: :lazy_watch }
@@ -34,8 +34,9 @@ module JobExecutor
         end
 
         machine.on :do_job do
-          print "\n Do job: #{@finded_job}" if PRINT_QUEUER # так веселее.
+          print "\n   Do job: #{@finded_job}" if PRINT_QUEUER # так веселее.
           Scan::JobController.new(@finded_job.as String)
+            .run
 
           @finded_job = nil
           machine.event(:job_done)

@@ -3,6 +3,6 @@ require "./JobExecutor/*"
 module JobExecutor
   RedisSeeker::Queue.new # runs fiber
 
-  print "\n    PRESS ENTER TO EXIT\n\n"
+  print "\n    PRESS ENTER TO EXIT\n"
   gets
 end

@@ -3,7 +3,7 @@ module JobExecutor
   ENV_NAME             = "development"
   LAZY_INTERVAL        = 5
   AWAKE_INTERVAL       = 0.2
-  AWAKE_TIME_LIMIT     = 60 * 10
+  AWAKE_TIME_LIMIT     = 60 * 1
   SCHEDULE_QUEUE       = "schedule"
   STANDART_QUEUES      = ["default_scan"]
   SCHEDULE_INTERVAL    = 60
