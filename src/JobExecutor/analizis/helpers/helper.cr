@@ -1,7 +1,5 @@
 module Analizis
-
   module Helper
-
     # for optimize when some elements wil be rejected before full fin
     # def each_children(node)
     #   child, index = node.first_element_child, 0
@@ -18,19 +16,21 @@ module Analizis
 
 
     def each_children(node)
-      node.children.select(&.element?).reject(&.comment?).each_with_index do |child, i|
+      all_childrens(node).each_with_index do |child, i|
         yield child, i
       end
     end
 
 
 
-    def link?(element)
-      element[:href] =~ /^(\#|javascript|mailto|\/$)/ unless element[:href].nil?
+    def all_childrens(node) : Array(XML::Node)
+      node.children.select { |child| child.element? && !child.comment? }
     end
 
 
 
-  end
-
+    def link?(element) : Bool
+      element[:href] =~ /^(\#|javascript|mailto|\/$)/ unless element[:href].nil?
+    end
+  end # module
 end

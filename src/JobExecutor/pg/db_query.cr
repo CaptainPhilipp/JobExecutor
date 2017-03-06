@@ -93,10 +93,6 @@ class DBquery < Query::Builder
     table.insert datas
   end
 
-  def self.update(datas : Hash|NamedTuple)
-    table.update datas
-  end
-
   #
   # redefine for "DBquery.method args"
   #

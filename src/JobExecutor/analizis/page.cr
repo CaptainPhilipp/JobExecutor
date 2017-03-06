@@ -7,32 +7,49 @@ module Analizis
   class Page
     include Helper
     @doc : XML::Node?
+    @options : Hash(String, Hash(String, Int32))
 
-    def initialize(url)
-      body = get_body(url)
-      unless body.empty?
-        @doc = XML.parse_html(body)
-        traverse_tree
-      end
+
+
+    def initialize(url, @options)
+      @body = get_body(url)
+      @sequences = [] of Sequence
     end
 
 
 
-    def traverse_tree(node = @doc)
+    def read
+      return if @body.empty?
+      @doc  = XML.parse_html(@body)
+      @body = ""
+      traverse_tree
+    end
+
+
+
+    private def traverse_tree(node = @doc)
       return if node.nil?
-      set = Sequence.new(node)
-      if set.relevant?
+      childrens = all_childrens(node)
+      sequence = Sequence.new(childrens, pointerof(@options))
+        @sequences << sequence # прост))
+      if sequence.relevant?
+        @sequences << sequence
         #
-        # TODO
         #
       else
-        each_children(node) { |child| traverse_tree(child) }
+        childrens.each_with_index { |child| traverse_tree(child) }
       end
     end
 
 
 
-    def get_body(url, retry = false)
+    def prepare_serialize : Array(Array(Hash(Symbol, String | Array(String))?)?)
+      @sequences.map(&.prepare_serialize).reject(&.nil?)
+    end
+
+
+
+    private def get_body(url, retry = false)
       puts "retry (#{url})" if retry
       url = url.is_a?(URI) ? url : URI.parse(url)
       HTTP::Client.get(url).body
@@ -46,7 +63,7 @@ module Analizis
 
 
 
-    def cache
+    private def cache
       filename = @url.to_s.split("/")[3..-1].join(".").gsub(/[[[:punct:]][[:blank:]]]/, ".")
       root = "/Crystal/job_executor"
       dir = root + ".tmp" + uri.host.as(String)

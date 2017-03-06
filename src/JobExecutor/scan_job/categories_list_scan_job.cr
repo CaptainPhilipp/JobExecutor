@@ -10,9 +10,6 @@ module JobExecutor
         @page = Analizis::Page.new @source_uri, @options.value[JOB_NAME]
         @page.as(Analizis::Page).read
       end
-
-
-
     end
   end
 end

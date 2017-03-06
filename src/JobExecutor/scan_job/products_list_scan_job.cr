@@ -10,7 +10,5 @@ module JobExecutor
         Analizis::Page.new @source_uri, @options.value[JOB_NAME]
       end
     end
-
-
   end
 end
