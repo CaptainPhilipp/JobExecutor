@@ -3,8 +3,7 @@ module Analizis
   # Build :light and :full signature for sequence finding
   class Signature
     include Helper
-
-
+   alias SERIALIZED = Nil | Hash(Symbol, String | Array(String))
 
     def initialize(@node : XML::Node)
       @started_at = Time.now.epoch_ms.as Int64
@@ -81,10 +80,11 @@ module Analizis
 
 
 
-    def relevant?(options : Hash(String, Hash(String, Int32)))
+    def relevant?(options : Page::OPTIONS)
       current_values = {names: @names, ids: @ids, classes: @classes, deep: @deep}
       reviewer = Analizis::OptionReviewer.new current_values.to_h
 
+      return @relevant unless options && options[@mode.to_s]?
       options[@mode.to_s].each do |option, value|
         to_irrelevant unless reviewer.validate option, value
       end
@@ -111,7 +111,7 @@ module Analizis
 
 
 
-    def prepare_serialize : Hash(Symbol, String | Array(String))?
+    def prepare_serialize : SERIALIZED
       return if @name.blank? && @ids.empty? && @classes.empty?
       { time:    @time.to_s,
         deep:    @deep.to_s,

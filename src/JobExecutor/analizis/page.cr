@@ -6,10 +6,12 @@ require "./helpers/*"
 module Analizis
   class Page
     include Helper
+
+    alias OPTIONS    = Hash(String, Hash(String, Int32)) | Nil #job# {#mode: {#option: #value}}
+    alias SERIALIZED = Array(Sequence::SERIALIZED)
+
     @doc : XML::Node?
-    @options : Hash(String, Hash(String, Int32))
-
-
+    @options : OPTIONS
 
     def initialize(url, @options)
       @body = get_body(url)
@@ -43,7 +45,7 @@ module Analizis
 
 
 
-    def prepare_serialize : Array(Array(Hash(Symbol, String | Array(String))?)?)
+    def prepare_serialize : SERIALIZED
       @sequences.map(&.prepare_serialize).reject(&.nil?)
     end
 

@@ -2,11 +2,13 @@ module JobExecutor
   module Scan
 
     class JobController
+      alias OPTIONS = Hash(String, Analizis::Page::OPTIONS)
+
       @start   : Float64
       @src_ids : Array(String)
       @jobs    : Array(String)
       @is_test : Bool
-      @options : Hash(String, Hash(String, Hash(String, Int32)))
+      @options : OPTIONS
 
 
 
@@ -19,6 +21,27 @@ module JobExecutor
         # @options  = specifics["options"]
         @results  = Hash(String, Hash(Int32, Job)).new
         @channel  = Channel(Tuple(String, Int32, Job)).new
+
+        # dummy
+        @options = {
+          "categories_list" => {
+            "first" => {
+              "max_deep" => 1
+            }
+          },
+
+          "products_list" => {
+            "first" => {
+              "max_deep" => 1
+            }
+          },
+
+          "product_scan" => {
+            "first" => {
+              "max_deep" => 1
+            }
+          }
+        }.as Hash(String, Hash(String, Hash(String, Int32)) | Nil)
       end
 
 

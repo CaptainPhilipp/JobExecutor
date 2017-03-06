@@ -5,18 +5,21 @@ module Analizis
   # Looking for relevant sequence of siblings, with right data
   class Sequence
     include Helper
+
     getter :node, :signatures
-    @@modes            = {:first, :light, :full}
-    @@mode_transitions = {first: :light, light: :full}
-    @mode : Symbol
-    @options : Pointer(Hash(String, Hash(String, Int32)))
 
+    alias SERIALIZED = Nil | Array(Signature::SERIALIZED)
 
+    MODES            = {:first, :light, :full}
+    MODE_TRANSITIONS = {first: :light, light: :full}
+    # MODE_TRANSITIONS = {MODES[0] => MODES[1], MODES[1] => MODES[2]}
+
+    @options : Pointer(Page::OPTIONS)
 
     def initialize(@nodeset : Array(XML::Node), @options)
       @signatures = [] of Signature
       @relevant   = true
-      @mode       = @@modes.first
+      @mode       = MODES.first.as Symbol
 
       process_sequence
     end
@@ -42,9 +45,9 @@ module Analizis
 
 
     private def init_signature(index, child)
-      if @mode == @@modes.first
+      if @mode == MODES.first
         @signatures << Signature.new(child)
-      elsif @@modes.includes? @mode
+      elsif MODES.includes? @mode
         @signatures[index].switch_mode_to @mode
       end
     end
@@ -74,7 +77,7 @@ module Analizis
 
 
     def switch_mode : Symbol | Nil
-      @mode = @@mode_transitions[@mode] if @@mode_transitions[@mode]?
+      @mode = MODE_TRANSITIONS[@mode] if MODE_TRANSITIONS[@mode]?
     end
 
 
@@ -91,7 +94,7 @@ module Analizis
 
 
 
-    def prepare_serialize : Array(Hash(Symbol, String | Array(String))?)?
+    def prepare_serialize : SERIALIZED
       return if @signatures.empty?
       @signatures.map(&.prepare_serialize).reject(&.nil?)
     end

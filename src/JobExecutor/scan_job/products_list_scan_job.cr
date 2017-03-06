@@ -4,10 +4,10 @@ module JobExecutor
   module Scan
 
     class ProductsList < Scan::Job
-      JOB_NAME = "products_list"
+      @@job_name = "products_list"
 
       def run : Void
-        Analizis::Page.new @source_uri, @options.value[JOB_NAME]
+        Analizis::Page.new @source_uri, get_job_options
       end
     end
   end
