@@ -20,7 +20,7 @@ module JobExecutor
       end
 
       def get_job_options
-        @options.value[@@job_name] if @options.value[@@job_name]?
+        @options.value[@@job_name]
       end
     end
   end

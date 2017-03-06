@@ -7,7 +7,7 @@ module Analizis
   class Page
     include Helper
 
-    alias OPTIONS    = Hash(String, Hash(String, Int32)) | Nil #job# {#mode: {#option: #value}}
+    alias OPTIONS    = Hash(String, Hash(String, Int32)) #job# {#mode: {#option: #value}}
     alias SERIALIZED = Array(Sequence::SERIALIZED)
 
     @doc : XML::Node?

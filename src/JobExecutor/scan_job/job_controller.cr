@@ -41,7 +41,7 @@ module JobExecutor
               "max_deep" => 1
             }
           }
-        }.as Hash(String, Hash(String, Hash(String, Int32)) | Nil)
+        }
       end
 
 
