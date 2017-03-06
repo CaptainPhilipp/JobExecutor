@@ -3,20 +3,17 @@ module JobExecutor
 
     class Job
       @source_uri : String
+      @page       : Analizis::Page?
+      @options    : Pointer(Hash(String, Hash(String, Hash(String, Int32))))
 
-      def initialize(@source_uri) end
+      def initialize(@source_uri, @options) end
 
-      def run : Void
-      end
+      def run : Void; end
 
-      def to_json(json : JSON::Builder)
-        json.object do
-          json.field "source_uri", @source_uri
-        end
-      end
-
-      def clone
-        Job.new(@source_uri)
+      def prepare_serialize : Hash(Symbol, String | Nil | Array(Array(Hash(Symbol, String | Array(String))?)?) )
+        page = @page ? @page.as(Analizis::Page).prepare_serialize : nil
+        { uri:  @source_uri,
+          page: page }.to_h
       end
 
     end
