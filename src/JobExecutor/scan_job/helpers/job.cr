@@ -2,8 +2,9 @@ module JobExecutor
   module Scan
 
     class Job
-      alias SERIALIZED = Hash(Symbol, Nil | String | Analizis::Page::SERIALIZED )
-      alias OPTIONS = JobController::OPTIONS*
+      alias Serialized = Hash(Symbol, Nil | String | Analizis::Page::Serialized )
+      # alias OPTIONS = JobController::OPTIONS*
+      alias OPTIONS = Hash(String, Analizis::Signature::ModeOptions)*
 
       @source_uri : String
       @page       : Analizis::Page?
@@ -13,7 +14,7 @@ module JobExecutor
 
       def run : Void; end
 
-      def prepare_serialize : SERIALIZED
+      def prepare_serialize : Serialized
         page = @page ? @page.as(Analizis::Page).prepare_serialize : nil
         { uri:  @source_uri,
           page: page }.to_h

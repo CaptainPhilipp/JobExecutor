@@ -8,15 +8,12 @@ module Analizis
 
     getter :node, :signatures
 
-    alias SERIALIZED = Nil | Array(Signature::SERIALIZED)
+    alias Serialized = Array(Signature::Serialized) | Nil
 
     MODES            = {:first, :light, :full}
     MODE_TRANSITIONS = {first: :light, light: :full}
-    # MODE_TRANSITIONS = {MODES[0] => MODES[1], MODES[1] => MODES[2]}
 
-    @options : Pointer(Page::OPTIONS)
-
-    def initialize(@nodeset : Array(XML::Node), @options)
+    def initialize(@nodeset : Array(XML::Node), @options : Signature::ModeOptions*)
       @signatures = [] of Signature
       @relevant   = true
       @mode       = MODES.first.as Symbol
@@ -43,12 +40,12 @@ module Analizis
     end
 
 
-
+    # для первого цикла ::new, для последющих #switch_mode_to
     private def init_signature(index, child)
       if @mode == MODES.first
-        @signatures << Signature.new(child)
-      elsif MODES.includes? @mode
-        @signatures[index].switch_mode_to @mode
+        @signatures << Signature.new(child, pointerof(@mode))
+      # elsif MODES.includes? @mode
+        # @signatures[index].switch_mode_to @mode
       end
     end
 
@@ -94,7 +91,7 @@ module Analizis
 
 
 
-    def prepare_serialize : SERIALIZED
+    def prepare_serialize : Serialized
       return if @signatures.empty?
       @signatures.map(&.prepare_serialize).reject(&.nil?)
     end

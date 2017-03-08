@@ -3,18 +3,26 @@ module Analizis
   # Build :light and :full signature for sequence finding
   class Signature
     include Helper
-   alias SERIALIZED = Nil | Hash(Symbol, String | Array(String))
 
-    def initialize(@node : XML::Node)
+    alias OptionsHash = Hash(String, Reviewer::OptionValue) # "option" => value
+    alias ModeOptions = Hash(String, OptionsHash)?          # "mode" => {options}
+
+    alias StampData   = Int32 | Array(String)
+    alias StampsData  = Hash(String, StampData)
+
+    alias SerialValue = String | Array(String)
+    alias Serialized  = Hash(Symbol, SerialValue) | Nil
+
+    def initialize(@node : XML::Node, @mode : Symbol*)
       @started_at = Time.now.epoch_ms.as Int64
-      @mode       = :first
+      # @mode       = Sequence::MODES.first
       @children   = all_childrens(@node).as(Array(XML::Node))
       @relevant   = true
 
-      @name     = String.new
-      @names    = Array(String).new
-      @ids      = Array(String).new
-      @classes  = Array(String).new
+      @name     = ""
+      @names    = [] of String
+      @ids      = [] of String
+      @classes  = [] of String
       @time     = 0
       @deep     = 0
     end
@@ -22,7 +30,7 @@ module Analizis
 
 
     def scan
-      case @mode
+      case @mode.value
       when :first then first_scan
       when :light then light_scan
       when :full  then full_scan
@@ -80,12 +88,16 @@ module Analizis
 
 
 
-    def relevant?(options : Page::OPTIONS)
-      current_values = {names: @names, ids: @ids, classes: @classes, deep: @deep}
-      reviewer = Analizis::OptionReviewer.new current_values.to_h
+    def relevant?(options : ModeOptions)
+      # values in current signature instance
+      sign_values = { "names" => @names, "ids" => @ids,
+                      "classes" => @classes, "deep" => @deep}
 
-      return @relevant unless options && options[@mode.to_s]?
-      options[@mode.to_s].each do |option, value|
+      reviewer = Analizis::Reviewer.new sign_values.to_h
+
+      return @relevant unless options && options[@mode.value.to_s]?
+
+      options[@mode.value.to_s].each do |option, value|
         to_irrelevant unless reviewer.validate option, value
       end
 
@@ -100,18 +112,18 @@ module Analizis
 
 
 
-    def switch_mode_to(mode : Symbol)
-      modes = [:first, :light, :full]
-      if modes.includes? mode
-        @mode = mode
-      else
-        raise "ERROR: Wrong mode"
-      end
-    end
+    # def switch_mode_to(mode : Symbol)
+    #   modes = [:first, :light, :full]
+    #   if modes.includes? mode
+    #     @mode = mode
+    #   else
+    #     raise "ERROR: Wrong mode"
+    #   end
+    # end
 
 
 
-    def prepare_serialize : SERIALIZED
+    def prepare_serialize : Serialized
       return if @name.blank? && @ids.empty? && @classes.empty?
       { time:    @time.to_s,
         deep:    @deep.to_s,

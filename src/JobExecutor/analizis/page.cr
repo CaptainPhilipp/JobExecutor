@@ -7,13 +7,9 @@ module Analizis
   class Page
     include Helper
 
-    alias OPTIONS    = Hash(String, Hash(String, Int32)) #job# {#mode: {#option: #value}}
-    alias SERIALIZED = Array(Sequence::SERIALIZED)
+    alias Serialized  = Array(Sequence::Serialized)
 
-    @doc : XML::Node?
-    @options : OPTIONS
-
-    def initialize(url, @options)
+    def initialize(url, @options : Signature::ModeOptions)
       @body = get_body(url)
       @sequences = [] of Sequence
     end
@@ -22,7 +18,7 @@ module Analizis
 
     def read
       return if @body.empty?
-      @doc  = XML.parse_html(@body)
+      @doc  = XML.parse_html(@body).as XML::Node?
       @body = ""
       traverse_tree
     end
@@ -45,7 +41,7 @@ module Analizis
 
 
 
-    def prepare_serialize : SERIALIZED
+    def prepare_serialize : Serialized
       @sequences.map(&.prepare_serialize).reject(&.nil?)
     end
 
