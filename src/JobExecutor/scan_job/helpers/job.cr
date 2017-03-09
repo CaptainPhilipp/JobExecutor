@@ -16,8 +16,8 @@ module JobExecutor
 
       def prepare_serialize : Serialized
         page = @page ? @page.as(Analizis::Page).prepare_serialize : nil
-        { uri:  @source_uri,
-          page: page }.to_h
+        Hash{ uri:  @source_uri,
+              page: page }
       end
 
       def get_job_options

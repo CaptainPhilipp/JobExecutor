@@ -15,16 +15,15 @@ module Analizis
 
     def initialize(@node : XML::Node, @mode : Symbol*)
       @started_at = Time.now.epoch_ms.as Int64
-      # @mode       = Sequence::MODES.first
       @children   = all_childrens(@node).as(Array(XML::Node))
       @relevant   = true
 
-      @name     = ""
-      @names    = [] of String
-      @ids      = [] of String
-      @classes  = [] of String
-      @time     = 0
-      @deep     = 0
+      @name    = ""
+      @names   = [] of String
+      @ids     = [] of String
+      @classes = [] of String
+      @time    = 0
+      @deep    = 0
     end
 
 
@@ -77,9 +76,9 @@ module Analizis
     private def add_results(node, first = false)
       attributes = node.attributes
 
-      @names    << node.name unless first
-      @ids      += get_attributes(attributes, "id")
-      @classes  += get_attributes(attributes, "class")
+      @names   << node.name unless first
+      @ids     += chomp_attributes(attributes, "id")
+      @classes += chomp_attributes(attributes, "class")
 
       now         = Time.now.epoch_ms
       @time      += now - @started_at
@@ -90,10 +89,10 @@ module Analizis
 
     def relevant?(options : ModeOptions)
       # values in current signature instance
-      sign_values = { "names" => @names, "ids" => @ids,
-                      "classes" => @classes, "deep" => @deep}
+      sign_values = Hash{"names"   => @names,   "ids"  => @ids,
+                         "classes" => @classes, "deep" => @deep}
 
-      reviewer = Analizis::Reviewer.new sign_values.to_h
+      reviewer = Analizis::Reviewer.new sign_values
 
       return @relevant unless options && options[@mode.value.to_s]?
 
@@ -112,33 +111,23 @@ module Analizis
 
 
 
-    # def switch_mode_to(mode : Symbol)
-    #   modes = [:first, :light, :full]
-    #   if modes.includes? mode
-    #     @mode = mode
-    #   else
-    #     raise "ERROR: Wrong mode"
-    #   end
-    # end
-
-
-
     def prepare_serialize : Serialized
       return if @name.blank? && @ids.empty? && @classes.empty?
-      { time:    @time.to_s,
-        deep:    @deep.to_s,
-        name:    @name,
-        names:   @names,
-        ids:     @ids,
-        classes: @classes }.to_h
+      Hash{ time:    @time.to_s,
+            deep:    @deep.to_s,
+            name:    @name,
+            names:   @names,
+            ids:     @ids,
+            classes: @classes }
     end
 
 
 
-    private def get_attributes(attributes, name) : Array(String)| Array(Nil)
+    private def chomp_attributes(attributes, name) : Array(String)| Array(Nil)
       return [] of String unless attributes[name]?
-      matched = /\A\s?#{name}="([a-z -0-9_A-Z]*)"\z/.match(attributes[name].to_s)
-      results = (matched.try &.[1]).try &.split(" ")
+      attributes[name].to_s =~ /\A\s?#{name}="([a-z\s-0-9_]*)"\z/i
+
+      results = $1.split(" ")
       results && results.any? ? results : [] of String
     end
   end # class
