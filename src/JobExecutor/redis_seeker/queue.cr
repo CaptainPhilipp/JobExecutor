@@ -35,8 +35,8 @@ module JobExecutor
 
         machine.on :do_job do
           print "\n   Do job: #{@finded_job}" if PRINT_QUEUER # так веселее.
-          Scan::JobController.new(@finded_job.as String)
-            .run
+          specification = JSON.parse(@finded_job.as String).to_h
+          Scan::Task.new(specification).run
 
           @finded_job = nil
           machine.event(:job_done)

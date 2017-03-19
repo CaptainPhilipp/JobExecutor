@@ -5,91 +5,56 @@ module Analizis
   # Looking for relevant sequence of siblings, with right data
   class Sequence
     include Helper
-
     getter :node, :signatures
-
     alias Serialized = Array(Signature::Serialized) | Nil
 
     MODES            = {:first, :light, :full}
     MODE_TRANSITIONS = {first: :light, light: :full}
 
-    def initialize(@nodeset : Array(XML::Node), @options : Signature::ModeOptions*)
-      @signatures = [] of Signature
-      @relevant   = true
-      @mode       = MODES.first.as Symbol
+    getter? relevant : Bool?
 
-      process_sequence
+    def initialize(@nodeset : Array(XML::Node)*, @job_options : OptionsOfJob*)
+      @mode = MODES.first.as Symbol
+      @channel = Channel(Bool).new
     end
 
+    def process
+      spawn { parse }
+      @relevant = @channel.receive
+    end
 
+    private def parse
+      option_set = @job_options.value[@mode]
+      set = SignatureSet.new(@mode, option_set, @channel)
 
-    private def process_sequence
-      @nodeset.each_with_index do |child, index|
-
-        init_signature    index, child
-        process_signature index
-        check_signature   index
-        return unless relevant?
-
-        check_sequence    index
-        return unless relevant?
+      @nodeset.value.each_with_index do |node, index|
+        node_pntr = pointerof(node)
+        signature = Signature.new(node_pntr, @mode, option_set, @channel)
+        signature.scan
+        set << signature
       end
 
-      return unless switch_mode
-      process_sequence
+      # throw :validating, true unless switch_mode # true if no throws
+      @channel.send true unless switch_mode # true if no throws
+      parse # repeat with next mode
     end
-
 
     # для первого цикла ::new, для последющих #switch_mode_to
     private def init_signature(index, child)
       if @mode == MODES.first
         @signatures << Signature.new(child, pointerof(@mode))
-      # elsif MODES.includes? @mode
-        # @signatures[index].switch_mode_to @mode
       end
     end
-
-
 
     private def process_signature(index)
       @signatures[index].scan
     end
 
-
-
-    private def check_signature(index)
-      to_irrelevant unless @signatures[index].relevant? @options.value
+    def switch_mode : Bool
+      return false unless MODE_TRANSITIONS[@mode]?
+      @mode = MODE_TRANSITIONS[@mode]
+      true
     end
-
-
-
-    private def check_sequence(index)
-      # @signatures[index]
-      #
-      # TODO compare signatures, stamps etc
-      #
-      to_irrelevant # dummy
-    end
-
-
-
-    def switch_mode : Symbol | Nil
-      @mode = MODE_TRANSITIONS[@mode] if MODE_TRANSITIONS[@mode]?
-    end
-
-
-
-    def relevant? : Bool
-      @relevant
-    end
-
-
-
-    def to_irrelevant
-      @relevant = false
-    end
-
-
 
     def prepare_serialize : Serialized
       return if @signatures.empty?

@@ -9,4 +9,7 @@ module JobExecutor
   SCHEDULE_INTERVAL    = 60
   SCAN_TYPES_LIST      = %w(categories_list products_list scan_product)
   PRINT_QUEUER         = true
+
+  alias OptionsOfJob = Hash(String, OptionSet) # mode_name => set
+  alias TaskOptions  = Hash(String, OptionsOfJob) # job_name => mode
 end

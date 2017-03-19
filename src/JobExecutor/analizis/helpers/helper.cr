@@ -15,15 +15,7 @@ module Analizis
 
 
 
-    def each_children(node)
-      all_childrens(node).each_with_index do |child, i|
-        yield child, i
-      end
-    end
-
-
-
-    def all_childrens(node) : Array(XML::Node)
+    def all_childrens_of(node) : Array(XML::Node)
       node.children.select { |child| child.element? && !child.comment? }
     end
 

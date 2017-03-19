@@ -3,127 +3,82 @@ module Analizis
   # Build :light and :full signature for sequence finding
   class Signature
     include Helper
+    getter mode, results
 
-    alias OptionsHash = Hash(String, Reviewer::OptionValue) # "option" => value
-    alias ModeOptions = Hash(String, OptionsHash)?          # "mode" => {options}
+    @node : XML::Node*
+    @mode : Symbol
+    @option_set : OptionSet
+    @channel : Channel(Bool)
 
-    alias StampData   = Int32 | Array(String)
-    alias StampsData  = Hash(String, StampData)
+    def initialize(@node, @mode, @option_set, @channel)
+      @started_at = Time.now.epoch_ms.as Int64
+      @childrens  = all_childrens_of(@node.value).as(Array(XML::Node))
+      @results    = Results.new
+    end
 
-    alias SerialValue = String | Array(String)
+    # runs only once!
+    def scan
+      case @mode
+      when :first then node_scan
+      when :light then children_scan
+      when :full  then descendent_scan
+      end
+    end
+
+    private def node_scan
+      save_results(@node.value)
+    end
+
+    private def children_scan
+      size = @childrens.size
+      @results.deep = 1 if size > 0
+      @childrens.each { |child| save_results(child) }
+    end
+
+    private def descendent_scan
+      @childrens.each { |child| save_results_recursive(child) }
+    end
+
+    # except current node results
+    private def save_results_recursive(node)
+      childrens = all_childrens_of(node)
+      return if childrens.size == 0
+      @results.deep += 1
+      childrens.each do |child|
+        save_results(child)
+        validate!
+        save_results_recursive child
+      end
+    end
+
+    # results for one node
+    private def save_results(node)
+      attributes = node.attributes
+      @results.deep    += 1
+      @results.names   << node.name
+      @results.ids     += extract_attribute(attributes, "id")
+      @results.classes += extract_attribute(attributes, "class")
+
+      validate!
+    end
+
+    # values in current signature instance
+    def validate!
+      invalid! unless @option_set.validate(@results)
+    end
+
+    def invalid!
+      @channel.send false
+    end
+
+    alias SerialValue = Int32 | Array(String)
     alias Serialized  = Hash(Symbol, SerialValue) | Nil
 
-    def initialize(@node : XML::Node, @mode : Symbol*)
-      @started_at = Time.now.epoch_ms.as Int64
-      @children   = all_childrens(@node).as(Array(XML::Node))
-      @relevant   = true
-
-      @name    = ""
-      @names   = [] of String
-      @ids     = [] of String
-      @classes = [] of String
-      @time    = 0
-      @deep    = 0
-    end
-
-
-
-    def scan
-      case @mode.value
-      when :first then first_scan
-      when :light then light_scan
-      when :full  then full_scan
-      end
-    end
-
-
-    # only @node result
-    private def first_scan
-      @name = @node.name.to_s
-      add_results(@node, first: true)
-    end
-
-
-
-    # only @node's children result
-    private def light_scan
-      size = @children.size
-      @deep = 1 if size > 0
-
-      @children.each { |child| add_results(child) }
-    end
-
-
-    # descendent results, except @node's children
-    private def full_scan
-      @children.each { |child| add_results_recursive(child) }
-    end
-
-
-    # except node results
-    private def add_results_recursive(node)
-      childrens = all_childrens(node)
-      return if childrens.size == 0
-      @deep += 1
-      childrens.each do |child|
-        add_results(child)
-        add_results_recursive child
-      end
-    end
-
-
-
-    private def add_results(node, first = false)
-      attributes = node.attributes
-
-      @names   << node.name unless first
-      @ids     += chomp_attributes(attributes, "id")
-      @classes += chomp_attributes(attributes, "class")
-
-      now         = Time.now.epoch_ms
-      @time      += now - @started_at
-      @started_at = now
-    end
-
-
-
-    def relevant?(options : ModeOptions)
-      # values in current signature instance
-      sign_values = Hash{"names"   => @names,   "ids"  => @ids,
-                         "classes" => @classes, "deep" => @deep}
-
-      reviewer = Analizis::Reviewer.new sign_values
-
-      return @relevant unless options && options[@mode.value.to_s]?
-
-      options[@mode.value.to_s].each do |option, value|
-        to_irrelevant unless reviewer.validate option, value
-      end
-
-      @relevant # dummy
-    end
-
-
-
-    def to_irrelevant
-      @relevant = false
-    end
-
-
-
     def prepare_serialize : Serialized
-      return if @name.blank? && @ids.empty? && @classes.empty?
-      Hash{ time:    @time.to_s,
-            deep:    @deep.to_s,
-            name:    @name,
-            names:   @names,
-            ids:     @ids,
-            classes: @classes }
+      @results.to_h
     end
 
-
-
-    private def chomp_attributes(attributes, name) : Array(String)| Array(Nil)
+    private def extract_attribute(attributes, name) : Array(String)| Array(Nil)
       return [] of String unless attributes[name]?
       attributes[name].to_s =~ /\A\s?#{name}="([a-z\s-0-9_]*)"\z/i
 
