@@ -46,7 +46,7 @@ module Analizis
       @results.deep += 1
       childrens.each do |child|
         save_results(child)
-        validate!
+        check!
         save_results_recursive child
       end
     end
@@ -59,15 +59,15 @@ module Analizis
       @results.ids     += extract_attribute(attributes, "id")
       @results.classes += extract_attribute(attributes, "class")
 
-      validate!
+      check!
     end
 
     # values in current signature instance
-    def validate!
-      invalid! unless @option_set.validate(@results)
+    def check!
+      irrelevant! unless @option_set.check(@results)
     end
 
-    def invalid!
+    def irrelevant!
       @channel.send false
     end
 

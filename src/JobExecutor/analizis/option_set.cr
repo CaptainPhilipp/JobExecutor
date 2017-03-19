@@ -5,25 +5,28 @@ class OptionSet
   alias OptionsHash = Hash(String, Option)
 
   def initialize
-    @options = OptionsHash.new
+    # by #diff_trigger?
+    @options = {true => OptionsHash.new, false => OptionsHash.new}
   end
 
   def <<(option : Option)
-    @options[option.key_name] = option
+    @options[option.diff_trigger?][option.key_name] = option
+  end
+
+  def take(key_name : String, *, diff_trigger = false) : Option?
+    @options[diff_trigger][key_name]?
+  end
+
+  def take(key_name : Symbol, *, diff_trigger = false) : Option?
+    take(key_name.to_s, diff_trigger)
   end
 
   def [](key_name : String) : Option?
-    @options[key_name]?
+    take(key_name)
   end
 
   def [](key_name : Symbol) : Option?
-    [key_name.to_s]
-  end
-
-  def each_option
-    @options.each do |key_name, option|
-      yield option, option.name, key_name
-    end
+    take(key_name.to_s)
   end
 
   def fill_with(options_hash : Hash(String, Int32))
@@ -32,12 +35,14 @@ class OptionSet
     end
   end
 
-  def validate(signature_results)
-    each_option do |option, name, key_name|
-      results = signature_results[name]?
-      valid = results ? option.validate(results.not_nil!) : nil
-      return false if valid == false # not nil
-    end
-    true
-  end
+  # def check(results, *, diff_trigger = false)
+  #   @options[diff_trigger].each do |key_name, option|
+  #     result = results[option.name]?
+  #     result = result.size if result.is_a?(List) && option.size_trigger?
+  #     return false if option.irrelevant?(result.not_nil!)
+  #   end
+  #   true
+  # end
+
+
 end
