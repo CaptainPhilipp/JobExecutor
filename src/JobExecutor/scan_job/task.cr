@@ -1,6 +1,7 @@
 module JobExecutor
   module Scan
 
+    # Задача, запускаемая по расписанию/из очереди
     class Task
       @start   : Float64
       @src_ids : Array(String)
@@ -33,7 +34,8 @@ module JobExecutor
         {
           "categories_list" => {
             "first" => {
-              "max_deep" => 1
+              "max_deep" => 1,
+              "max_deep_diff" => 2,
             }
           },
 

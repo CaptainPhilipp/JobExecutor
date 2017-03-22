@@ -1,5 +1,7 @@
-# Парсит имя опции, сохраняет её значение
-# check(current_value) возвращает соответствует ли значение опции
+# Парсит имя опции, сохраняет её значение, способ проверки, и ключевую инфу
+# Основной функционал - check и его антоним irrelevant?
+# Эти методы принимают значение (цифру) и возвращают Bool
+# (релевантно ли это значение)
 class Option
   alias List = Array(String)
 
@@ -14,7 +16,7 @@ class Option
   # min или max в имени опции укажут способ сравнения
   # size укажет нужно ли вычислять размер результата
   def initialize(@key_name, @option_value)
-    @splited_key     = @key_name.split(" ")
+    @splited_key    = @key_name.split(" ")
     # parse
     compare_trigger = exarticulate_compare_trigger
     @size_trigger   = exarticulate_size_trigger

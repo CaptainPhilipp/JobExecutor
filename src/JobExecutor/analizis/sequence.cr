@@ -2,7 +2,7 @@ require "./helpers/*"
 
 module Analizis
 
-  # Looking for relevant sequence of siblings, with right data
+  # Looking for relevant sequence of siblings
   class Sequence
     include Helper
     getter :node, :signatures
@@ -24,7 +24,7 @@ module Analizis
     end
 
     private def parse
-      option_set = @job_options.value[@mode]
+      option_set = @job_options.value[@mode] # OptionSet
       set = SignatureSet.new(@mode, option_set, @channel)
 
       @nodeset.value.each_with_index do |node, index|
@@ -34,8 +34,7 @@ module Analizis
         set << signature
       end
 
-      # throw :validating, true unless switch_mode # true if no throws
-      @channel.send true unless switch_mode # true if no throws
+      @channel.send true unless switch_mode # true when all pass
       parse # repeat with next mode
     end
 

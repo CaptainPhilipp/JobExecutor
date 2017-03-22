@@ -1,6 +1,6 @@
 module Analizis
 
-  # Build :light and :full signature for sequence finding
+  # Signature of XML Node and his descendents
   class Signature
     include Helper
     getter mode, results
@@ -16,7 +16,7 @@ module Analizis
       @results    = Results.new
     end
 
-    # runs only once!
+    # only runs once!
     def scan
       case @mode
       when :first then node_scan
@@ -29,17 +29,19 @@ module Analizis
       save_results(@node.value)
     end
 
+    # scan childrens of node
     private def children_scan
       size = @childrens.size
       @results.deep = 1 if size > 0
       @childrens.each { |child| save_results(child) }
     end
 
+    # scan descendents of node
     private def descendent_scan
       @childrens.each { |child| save_results_recursive(child) }
     end
 
-    # except current node results
+    # save results except current node`s results
     private def save_results_recursive(node)
       childrens = all_childrens_of(node)
       return if childrens.size == 0
@@ -51,7 +53,7 @@ module Analizis
       end
     end
 
-    # results for one node
+    # save results for one node
     private def save_results(node)
       attributes = node.attributes
       @results.deep    += 1
@@ -62,7 +64,7 @@ module Analizis
       check!
     end
 
-    # values in current signature instance
+    # check values in current signature instance
     def check!
       irrelevant! unless @option_set.check(@results)
     end

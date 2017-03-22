@@ -3,6 +3,7 @@ require "http/client"
 module JobExecutor
   module Scan
 
+    # подзадача из очереди - своя на каждый тип сканирования.
     class Job
       @source_uri   : String
       @page         : Analizis::Page?
