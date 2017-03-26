@@ -53,19 +53,19 @@ module JobExecutor
         }
       end
 
-      private def save_options(options)
-        each_mode(options) do |job, mode, options_hash|
-          option_set = OptionSet.new
-          option_set.fill_with(options_hash)
-          @options[job][mode] = option_set
-        end
-      end
-
       private def each_mode(options)
         options.each do |job_name, modes_hash|
           modes_hash.each do |mode_name, options_hash|
             yield job_name, mode_name, options_hash
           end
+        end
+      end
+
+      private def save_options(options)
+        builder = OptionSetBuilder.new
+        each_mode(options) do |job, mode, options_hash|
+          option_set = builder.build_option_set(options_hash)
+          @options[job][mode] = option_set
         end
       end
 

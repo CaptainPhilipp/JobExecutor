@@ -1,6 +1,7 @@
 module Analizis
 
   # set of signatures in sequence
+  #
   class SignatureSet
     @mode : Symbol
     @channel : Channel(Bool)
@@ -11,13 +12,13 @@ module Analizis
 
     # add signature to set, and check matches with saved signatures
     def <<(signature : Signature)
-      if find_match(signature)
-        # all right
-      elsif # @signatures.size option.invalid?
-        irrelevant!
-      elsif # if the new signature has an acceptable difference
-        @signatures << signature
-      end
+      # if find_match(signature)
+      #   # all right
+      # elsif # @signatures.size option.invalid?
+      #   irrelevant!
+      # elsif # if the new signature has an acceptable difference
+      #   @signatures << signature
+      # end
     end
 
     private def irrelevant!
